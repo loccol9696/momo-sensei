@@ -3,6 +3,8 @@ package com.example.be.dto.response;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDateTime;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -11,4 +13,6 @@ import lombok.experimental.FieldDefaults;
 public class FolderResponse {
     Long id;
     String name;
+    LocalDateTime usedAt;
+    LocalDateTime deletedAt;
 }

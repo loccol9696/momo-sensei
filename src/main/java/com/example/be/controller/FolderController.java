@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.function.EntityResponse;
 
 @RestController
 @RequestMapping("/api/folders")
@@ -79,16 +80,59 @@ public class FolderController {
     @Operation(
             summary = "Lấy danh sách thư mục"
     )
-    public ResponseEntity<Page<FolderResponse>> getFolders(
+    public ResponseEntity<ApiResponse<Page<FolderResponse>>> getFolders(
             Authentication authentication,
             @RequestParam(defaultValue = "") String search,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "usedAt") String sortBy
+            @RequestParam(defaultValue = "10") int size
     ) {
         Page<FolderResponse> response = folderService.getFolders(
-                authentication, search, page, size, sortBy
+                authentication, search, page, size
         );
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(
+                ApiResponse.<Page<FolderResponse>>builder()
+                        .success(true)
+                        .message("Lấy danh sách thư mục thành công")
+                        .data(response)
+                        .build()
+        );
+    }
+
+    @GetMapping("/trash")
+    @Operation(
+            summary = "Lấy danh sách thư mục trong thùng rác"
+    )
+    public ResponseEntity<ApiResponse<Page<FolderResponse>>> getTrashFolders(
+            Authentication authentication,
+            @RequestParam(defaultValue = "") String search,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Page<FolderResponse> response = folderService.getTrashFolders(
+                authentication, search, page, size
+        );
+        return ResponseEntity.ok(
+                ApiResponse.<Page<FolderResponse>>builder()
+                        .success(true)
+                        .message("Lấy danh sách thư mục trong thùng rác thành công")
+                        .data(response)
+                        .build()
+        );
+    }
+
+    @PostMapping("/restore/{id}")
+    @Operation(
+            summary = "Khôi phục thư mục từ thùng rác"
+    )
+    public ResponseEntity<ApiResponse<Void>> restoreFolder(
+            Authentication authentication, @PathVariable Long id
+    ) {
+        folderService.restoreFolder(authentication, id);
+        return ResponseEntity.ok(
+                ApiResponse.<Void>builder()
+                        .success(true)
+                        .message("Khôi phục thư mục thành công")
+                        .build()
+        );
     }
 }

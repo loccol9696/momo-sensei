@@ -5,12 +5,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 public interface FolderRepository extends JpaRepository<Folder, Long> {
-    Optional<Folder> findByIdAndUser_IdAndIsDeletedFalse(Long id, Long userId);
+    Optional<Folder> findByIdAndUser_IdAndIsDeleted(Long id, Long userId, boolean isDeleted);
 
-    Page<Folder> findByUserIdAndIsDeletedFalseAndNameContainingIgnoreCase(
-            Long userId, String name, Pageable pageable
+    Page<Folder> findByUser_IdAndIsDeletedAndNameContainingIgnoreCase(
+            Long userId, boolean isDeleted, String name, Pageable pageable
     );
+
+    List<Folder> findAllByIsDeletedTrueAndDeletedAtBefore(LocalDateTime threshold);
 }

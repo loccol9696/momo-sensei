@@ -18,6 +18,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -47,7 +50,7 @@ public class FolderService {
     ) {
         User user = authService.validateUser(authentication);
 
-        Folder folder = folderRepository.findByIdAndUser_IdAndIsDeletedFalse(id, user.getId())
+        Folder folder = folderRepository.findByIdAndUser_IdAndIsDeleted(id, user.getId(), false)
                 .orElseThrow(() -> new BusinessException("Thư mục không tồn tại", 404));
 
         folder.setName(folderRequest.getName());
@@ -61,7 +64,7 @@ public class FolderService {
     ) {
         User user = authService.validateUser(authentication);
 
-        Folder folder = folderRepository.findByIdAndUser_IdAndIsDeletedFalse(id, user.getId())
+        Folder folder = folderRepository.findByIdAndUser_IdAndIsDeleted(id, user.getId(), false)
                 .orElseThrow(() -> new BusinessException("Thư mục không tồn tại", 404));
 
         folder.setIsDeleted(true);
@@ -71,24 +74,56 @@ public class FolderService {
 
     @Transactional(readOnly = true)
     public Page<FolderResponse> getFolders(
-            Authentication authentication, String search, int page, int size, String sortBy
+            Authentication authentication, String search, int page, int size
     ) {
         User user = authService.validateUser(authentication);
 
-        Sort sort;
-
-        if ("name".equalsIgnoreCase(sortBy)) {
-            sort = Sort.by(Sort.Direction.ASC, "name");
-        } else {
-            sort = Sort.by(Sort.Direction.DESC, "usedAt");
-        }
+        Sort sort =  Sort.by(Sort.Direction.DESC, "usedAt");
 
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        Page<Folder> folderPage = folderRepository.findByUserIdAndIsDeletedFalseAndNameContainingIgnoreCase(
-                user.getId(), search, pageable
+        Page<Folder> folderPage = folderRepository.findByUser_IdAndIsDeletedAndNameContainingIgnoreCase(
+                user.getId(), false, search, pageable
         );
 
         return  folderPage.map(folderMapper::toFolderResponse);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<FolderResponse> getTrashFolders(
+            Authentication authentication, String search, int page, int size
+    ) {
+        User user = authService.validateUser(authentication);
+
+        Sort sort = Sort.by(Sort.Direction.DESC, "deletedAt");
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<Folder> folderPage = folderRepository.findByUser_IdAndIsDeletedAndNameContainingIgnoreCase(
+                user.getId(), true, search, pageable
+        );
+
+        return  folderPage.map(folderMapper::toFolderResponse);
+    }
+
+    @Transactional
+    public void restoreFolder(
+            Authentication authentication, Long id
+    ) {
+        User user = authService.validateUser(authentication);
+
+        Folder folder = folderRepository.findByIdAndUser_IdAndIsDeleted(id, user.getId(), true)
+                .orElseThrow(() -> new BusinessException("Thư mục không tồn tại", 404));
+
+        folder.setIsDeleted(false);
+
+        folderRepository.save(folder);
+    }
+
+    @Transactional
+    public void deleteExpiredFolders(LocalDateTime threshold) {
+        List<Folder> expired = folderRepository.findAllByIsDeletedTrueAndDeletedAtBefore(threshold);
+
+        folderRepository.deleteAll(expired);
     }
 }
