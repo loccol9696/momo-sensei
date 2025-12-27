@@ -14,7 +14,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.function.EntityResponse;
 
 @RestController
 @RequestMapping("/api/folders")
@@ -98,6 +97,23 @@ public class FolderController {
         );
     }
 
+    @GetMapping("/{id}")
+    @Operation(
+            summary = "Lấy thông tin thư mục theo ID"
+    )
+    public ResponseEntity<ApiResponse<FolderResponse>> getFolder(
+            Authentication authentication, @PathVariable Long id
+    ) {
+        FolderResponse response = folderService.getFolder(authentication, id);
+        return ResponseEntity.ok(
+                ApiResponse.<FolderResponse>builder()
+                        .success(true)
+                        .message("Lấy thông tin thư mục thành công")
+                        .data(response)
+                        .build()
+        );
+    }
+
     @GetMapping("/trash")
     @Operation(
             summary = "Lấy danh sách thư mục trong thùng rác"
@@ -120,7 +136,24 @@ public class FolderController {
         );
     }
 
-    @PostMapping("/restore/{id}")
+    @GetMapping("trash/{id}")
+    @Operation(
+            summary = "Lấy thông tin thư mục trong thùng rác theo ID"
+    )
+    public ResponseEntity<ApiResponse<FolderResponse>> getTrashFolder(
+            Authentication authentication, @PathVariable Long id
+    ) {
+        FolderResponse response = folderService.getTrashFolder(authentication, id);
+        return ResponseEntity.ok(
+                ApiResponse.<FolderResponse>builder()
+                        .success(true)
+                        .message("Lấy thông tin thư mục trong thùng rác thành công")
+                        .data(response)
+                        .build()
+        );
+    }
+
+    @PostMapping("trash/restore/{id}")
     @Operation(
             summary = "Khôi phục thư mục từ thùng rác"
     )

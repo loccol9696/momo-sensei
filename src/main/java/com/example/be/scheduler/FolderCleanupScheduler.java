@@ -18,7 +18,7 @@ public class FolderCleanupScheduler {
 
     FolderService folderService;
 
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(cron = "0 0 2 * * ?")
     public void cleanup() {
         log.info("Bắt đầu tiến trình dọn dẹp thùng rác...");
         folderService.deleteExpiredFolders(LocalDateTime.now().minusDays(30));
