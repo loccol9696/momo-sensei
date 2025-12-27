@@ -90,6 +90,16 @@ public class FolderService {
     }
 
     @Transactional(readOnly = true)
+    public FolderResponse getFolder(Authentication authentication, Long id) {
+        User user = authService.validateUser(authentication);
+
+        Folder folder = folderRepository.findByIdAndUser_IdAndIsDeleted(id, user.getId(), false)
+                .orElseThrow(() -> new BusinessException("Thư mục không tồn tại", 404));
+
+        return folderMapper.toFolderResponse(folder);
+    }
+
+    @Transactional(readOnly = true)
     public Page<FolderResponse> getTrashFolders(
             Authentication authentication, String search, int page, int size
     ) {
@@ -104,6 +114,16 @@ public class FolderService {
         );
 
         return  folderPage.map(folderMapper::toFolderResponse);
+    }
+
+    @Transactional(readOnly = true)
+    public FolderResponse getTrashFolder(Authentication authentication, Long id) {
+        User user = authService.validateUser(authentication);
+
+        Folder folder = folderRepository.findByIdAndUser_IdAndIsDeleted(id, user.getId(), true)
+                .orElseThrow(() -> new BusinessException("Thư mục không tồn tại", 404));
+
+        return folderMapper.toFolderResponse(folder);
     }
 
     @Transactional

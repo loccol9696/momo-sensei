@@ -27,4 +27,27 @@ public class FolderModule {
     Module module;
 
     LocalDateTime usedAt;
+
+    @Builder.Default
+    Boolean isDeleted = false;
+
+    LocalDateTime deletedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        this.usedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.usedAt = LocalDateTime.now();
+
+        if (Boolean.TRUE.equals(this.isDeleted)) {
+            if (this.deletedAt == null) {
+                this.deletedAt = LocalDateTime.now();
+            }
+        } else {
+            this.deletedAt = null;
+        }
+    }
 }
