@@ -12,4 +12,7 @@ public class ModuleResponse {
     Long id;
     String name;
     String description;
+    Long ownerId;
+    Long ownerName;
+    Integer totalCards;
 }

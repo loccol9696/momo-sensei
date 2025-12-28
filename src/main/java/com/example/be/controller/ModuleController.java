@@ -1,7 +1,6 @@
 package com.example.be.controller;
 
-import com.example.be.dto.request.CreateModuleRequest;
-import com.example.be.dto.request.UpdateModuleRequest;
+import com.example.be.dto.request.ModuleRequest;
 import com.example.be.dto.response.ApiResponse;
 import com.example.be.dto.response.ModuleResponse;
 import com.example.be.service.ModuleService;
@@ -17,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/modules")
+@RequestMapping("/api")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Tag(
         name = "Module Management",
@@ -27,14 +26,14 @@ public class ModuleController {
 
     ModuleService moduleService;
 
-    @PostMapping
+    @PostMapping("/folders/{folderId}/modules")
     @Operation(
             summary = "Tạo module mới"
     )
     public ResponseEntity<ApiResponse<ModuleResponse>> createModule(
-            Authentication authentication, @Valid @RequestBody CreateModuleRequest request
+            Authentication authentication,  @PathVariable Long folderId , @Valid @RequestBody ModuleRequest request
     ) {
-        ModuleResponse moduleResponse = moduleService.createModule(authentication, request);
+        ModuleResponse moduleResponse = moduleService.createModule(authentication, folderId , request);
 
         return ResponseEntity.ok(
                 ApiResponse.<ModuleResponse>builder()
@@ -44,12 +43,12 @@ public class ModuleController {
         );
     }
 
-    @PostMapping("/{id}")
+    @PutMapping("/modules/{id}")
     @Operation(
             summary = "Cập nhật module"
     )
     public ResponseEntity<ApiResponse<ModuleResponse>> updateModule(
-            Authentication authentication, @PathVariable Long id, @Valid @RequestBody UpdateModuleRequest request
+            Authentication authentication, @PathVariable Long id, @Valid @RequestBody ModuleRequest request
     ) {
         ModuleResponse moduleResponse = moduleService.updateModule(authentication, id, request);
 
@@ -60,4 +59,5 @@ public class ModuleController {
                         .build()
         );
     }
+
 }
