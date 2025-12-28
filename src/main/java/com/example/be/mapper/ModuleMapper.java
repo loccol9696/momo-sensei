@@ -9,6 +9,5 @@ import org.mapstruct.Mapping;
 public interface ModuleMapper {
     @Mapping(target = "ownerId", source = "user.id")
     @Mapping(target = "ownerName", source = "user.fullName")
-    @Mapping(target = "totalCards", expression = "java((module.getCards() != null) ? module.getCards().size() : 0)")
     ModuleResponse toModuleResponse(Module module);
 }

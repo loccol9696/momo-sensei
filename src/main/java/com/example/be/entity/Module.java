@@ -1,9 +1,12 @@
 package com.example.be.entity;
 
+import com.example.be.enums.ModulePermission;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.Formula;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,13 +28,30 @@ public class Module {
     @Column(columnDefinition = "NVARCHAR(1000)")
     String description;
 
+    String password;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     User user;
 
-    String password;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "folder_id", nullable = false)
+    Folder folder;
 
     @Builder.Default
     @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true)
     List<Card> cards = new ArrayList<>();
+
+    LocalDateTime usedAt;
+
+    @Enumerated(EnumType.STRING)
+    ModulePermission permission;
+
+    @Builder.Default
+    Boolean isDeleted = false;
+
+    LocalDateTime deletedAt;
+
+    @Formula("select count(c.id) from cards c where c.module_id = id")
+    Integer totalCards;
 }
