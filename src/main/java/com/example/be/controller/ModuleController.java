@@ -2,6 +2,7 @@ package com.example.be.controller;
 
 import com.example.be.dto.request.ModuleRequest;
 import com.example.be.dto.response.ApiResponse;
+import com.example.be.dto.response.ModuleDetailResponse;
 import com.example.be.dto.response.ModuleResponse;
 import com.example.be.service.ModuleService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Tag(
         name = "Module Management",
-        description = "API xử lý các chức năng liên quan đến quản lý module"
+        description = "API xử lý các chức năng liên quan đến quản lý học phần"
 )
 public class ModuleController {
 
@@ -29,7 +30,7 @@ public class ModuleController {
 
     @PostMapping("/folders/{folderId}/modules")
     @Operation(
-            summary = "Tạo module mới"
+            summary = "Tạo học phần mới"
     )
     public ResponseEntity<ApiResponse<ModuleResponse>> createModule(
             Authentication authentication,  @PathVariable Long folderId , @Valid @RequestBody ModuleRequest request
@@ -38,15 +39,16 @@ public class ModuleController {
 
         return ResponseEntity.ok(
                 ApiResponse.<ModuleResponse>builder()
+                        .success(true)
                         .data(moduleResponse)
-                        .message("Tạo module thành công")
+                        .message("Tạo học phần thành công")
                         .build()
         );
     }
 
     @PutMapping("/modules/{moduleId}")
     @Operation(
-            summary = "Cập nhật module"
+            summary = "Cập nhật học phần"
     )
     public ResponseEntity<ApiResponse<ModuleResponse>> updateModule(
             Authentication authentication, @PathVariable Long moduleId, @Valid @RequestBody ModuleRequest request
@@ -56,14 +58,14 @@ public class ModuleController {
         return ResponseEntity.ok(
                 ApiResponse.<ModuleResponse>builder()
                         .data(moduleResponse)
-                        .message("Cập nhật module thành công")
+                        .message("Cập nhật học phần thành công")
                         .build()
         );
     }
 
     @DeleteMapping("/modules/{moduleId}")
     @Operation(
-            summary = "Xóa module"
+            summary = "Xóa học phần"
     )
     public ResponseEntity<ApiResponse<Void>> deleteModule(
             Authentication authentication, @PathVariable Long moduleId
@@ -72,6 +74,7 @@ public class ModuleController {
 
         return ResponseEntity.ok(
                 ApiResponse.<Void>builder()
+                        .success(true)
                         .message("Học phần đã được chuyển vào thùng rác")
                         .build()
         );
@@ -79,7 +82,7 @@ public class ModuleController {
 
     @GetMapping("/folders/{folderId}/modules")
     @Operation(
-            summary = "Lấy danh sách module theo thư mục"
+            summary = "Lấy danh sách học phần theo thư mục"
     )
     public ResponseEntity<ApiResponse<Page<ModuleResponse>>> getModulesByFolder(
             Authentication authentication,
@@ -92,8 +95,29 @@ public class ModuleController {
 
         return ResponseEntity.ok(
                 ApiResponse.<Page<ModuleResponse>>builder()
+                        .success(true)
                         .data(moduleResponse)
                         .message("Lấy danh sách học phần thành công")
+                        .build()
+        );
+    }
+
+    @GetMapping("/modules/{moduleId}")
+    @Operation(
+            summary = "Lấy thông tin học phần"
+    )
+    public ResponseEntity<ApiResponse<ModuleDetailResponse>> getModule(
+            Authentication authentication,
+            @PathVariable Long moduleId,
+            @RequestParam (required = false) String password
+    ) {
+        ModuleDetailResponse moduleResponse = moduleService.getModule(authentication, moduleId, password);
+
+        return ResponseEntity.ok(
+                ApiResponse.<ModuleDetailResponse>builder()
+                        .success(true)
+                        .data(moduleResponse)
+                        .message("Lấy thông tin học phần thành công")
                         .build()
         );
     }

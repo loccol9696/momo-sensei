@@ -23,6 +23,6 @@ public class ModuleRequest {
     @NotNull(message = "Quyền truy cập module không được để trống")
     ModulePermission permission;
 
-    @Size(min = 6, max = 100, message = "Mật khẩu phải có độ dài từ 6 đến 100 ký tự")
+    @Size(max = 100, message = "Mật khẩu phải có độ dài từ 6 đến 100 ký tự")
     String password;
 }
