@@ -96,6 +96,7 @@ public class AuthService {
                 .email(pendingRequest.getEmail())
                 .password(passwordEncoder.encode(pendingRequest.getPassword()))
                 .fullName(pendingRequest.getFullName())
+                .authProvider(AuthProvider.NONE)
                 .build();
 
         userRepository.save(user);
