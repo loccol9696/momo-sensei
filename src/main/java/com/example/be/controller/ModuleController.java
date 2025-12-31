@@ -198,4 +198,69 @@ public class ModuleController {
                         .build()
         );
     }
+
+    @GetMapping("/modules/{moduleId}/export")
+    @Operation(
+            summary = "Xuất học phần"
+    )
+    public ResponseEntity<ApiResponse<String>> exportModule(
+            Authentication authentication,
+            @PathVariable Long moduleId,
+            @RequestParam(required = false) String password,
+            @RequestParam(defaultValue = "\t") String termSeparator,
+            @RequestParam(defaultValue = "\n") String cardSeparator
+    ) {
+        String response = moduleService.exportModule(
+                authentication,
+                moduleId,
+                password,
+                termSeparator,
+                cardSeparator
+        );
+
+        return ResponseEntity.ok(
+                ApiResponse.<String>builder()
+                        .success(true)
+                        .message("Xuất học phần thành công")
+                        .data(response)
+                        .build()
+        );
+    }
+
+    @GetMapping("/modules/{moduleId}/share")
+    @Operation(
+            summary = "Lấy link chia sẻ học phần"
+    )
+    public ResponseEntity<ApiResponse<String>> getShareLink(
+            @PathVariable Long moduleId
+    ) {
+        String shareLink = moduleService.getShareLink(moduleId);
+
+        return ResponseEntity.ok(
+                ApiResponse.<String>builder()
+                        .success(true)
+                        .message("Lấy link chia sẻ thành công")
+                        .data(shareLink)
+                        .build()
+        );
+    }
+
+    @PatchMapping("/modules/{moduleId}/like")
+    @Operation(
+            summary = "Chuyển đổi trạng thái thích học phần"
+    )
+    public ResponseEntity<ApiResponse<Void>> toggleLike(
+            Authentication authentication,
+            @PathVariable Long moduleId
+    ) {
+        moduleService.toggleLike(authentication, moduleId);
+        return ResponseEntity.ok(
+                ApiResponse.<Void>builder()
+                        .success(true)
+                        .message("Cập nhật trạng thái thích học phần thành công")
+                        .build()
+        );
+    }
+
+
 }

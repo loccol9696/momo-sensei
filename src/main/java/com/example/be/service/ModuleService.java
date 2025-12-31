@@ -16,11 +16,12 @@ import com.example.be.repository.ModuleRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -41,6 +42,10 @@ public class ModuleService {
     ModuleMapper moduleMapper;
     PasswordEncoder passwordEncoder;
     CardRepository cardRepository;
+
+    @NonFinal
+    @Value("${frontend.url}")
+    String frontendUrl;
 
     @Transactional
     public ModuleResponse createModule(
@@ -80,13 +85,9 @@ public class ModuleService {
     ) {
         User user = authService.validateUser(authentication);
 
-        Module module = moduleRepository.findByIdAndIsDeleted(moduleId, false).orElseThrow(
-                () -> new BusinessException("Học phần không tồn tại", 404)
+        Module module = moduleRepository.findByIdAndUser_IdAndIsDeleted(moduleId, user.getId(), false).orElseThrow(
+                () -> new BusinessException("Học phần không tồn tại hoặc đã bị xóa trước đó", 404)
         );
-
-        if (!Objects.equals(module.getUser().getId(), user.getId())) {
-            throw new BusinessException("Bạn không có quyền cập nhật học phần này", 403);
-        }
 
         module.setName(request.getName());
         module.setDescription(request.getDescription() != null ? request.getDescription() : "");
@@ -113,13 +114,9 @@ public class ModuleService {
     ) {
         User user = authService.validateUser(authentication);
 
-        Module module = moduleRepository.findByIdAndIsDeleted(moduleId, false).orElseThrow(
+        Module module = moduleRepository.findByIdAndUser_IdAndIsDeleted(moduleId, user.getId(), false).orElseThrow(
                 () -> new BusinessException("Học phần không tồn tại hoặc đã bị xóa trước đó", 404)
         );
-
-        if (!Objects.equals(module.getUser().getId(), user.getId())) {
-            throw new BusinessException("Bạn không có quyền xóa học phần này", 403);
-        }
 
         module.setIsDeleted(true);
         module.setDeletedAt(LocalDateTime.now());
@@ -153,11 +150,7 @@ public class ModuleService {
         Module module = moduleRepository.findByIdAndIsDeleted(moduleId, false)
                 .orElseThrow(() -> new BusinessException("Học phần không tồn tại", 404));
 
-        User currentUser = null;
-        if (authentication != null && authentication.isAuthenticated()
-                && !(authentication instanceof AnonymousAuthenticationToken)) {
-            currentUser = authService.validateUser(authentication);
-        }
+        User currentUser = authService.getCurrentUser(authentication);
 
         validateModuleAccess(module, currentUser, password);
 
@@ -167,7 +160,7 @@ public class ModuleService {
             boolean isNewView = module.getViewedByUsers().add(currentUser);
             response.setLiked(module.getLikedByUsers().contains(currentUser));
 
-            if(isNewView) {
+            if (isNewView) {
                 int currentViews = (response.getTotalViews() == null) ? 0 : response.getTotalViews();
                 response.setTotalViews(currentViews + 1);
             }
@@ -181,7 +174,7 @@ public class ModuleService {
 
     @Transactional(readOnly = true)
     public Page<ModuleResponse> getTrashModules(
-            Authentication authentication, String search , int page, int size
+            Authentication authentication, String search, int page, int size
     ) {
         User user = authService.validateUser(authentication);
 
@@ -193,7 +186,7 @@ public class ModuleService {
                 user.getId(), true, search, pageable
         );
 
-        return  modulePage.map(moduleMapper::toModuleResponse);
+        return modulePage.map(moduleMapper::toModuleResponse);
     }
 
     @Transactional(readOnly = true)
@@ -286,6 +279,67 @@ public class ModuleService {
             if (!passwordEncoder.matches(password, module.getPassword())) {
                 throw new BusinessException("Mật khẩu không đúng", 403);
             }
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public String exportModule(
+            Authentication authentication,
+            Long moduleId,
+            String password,
+            String termSeparator,
+            String cardSeparator
+    ) {
+        Module module = moduleRepository.findByIdAndIsDeleted(moduleId, false)
+                .orElseThrow(() -> new BusinessException("Học phần không tồn tại", 404));
+
+        User user = authService.validateUser(authentication);
+
+        validateModuleAccess(module, user, password);
+
+        StringBuilder exportBuilder = new StringBuilder();
+
+        List<Card> cards = module.getCards();
+        for (int i = 0; i < cards.size(); i++) {
+            Card card = cards.get(i);
+            exportBuilder.append(card.getTerm())
+                    .append(termSeparator)
+                    .append(card.getDefinition());
+            if (i < cards.size() - 1) {
+                exportBuilder.append(cardSeparator);
+            }
+        }
+
+        return exportBuilder.toString();
+    }
+
+    @Transactional(readOnly = true)
+    public String getShareLink(Long moduleId) {
+        Module module = moduleRepository.findByIdAndIsDeleted(moduleId, false)
+                .orElseThrow(() -> new BusinessException("Học phần không tồn tại", 404));
+
+        if (module.getPermission() == ModulePermission.PRIVATE) {
+            throw new BusinessException("Không thể chia sẻ học phần đang ở chế độ riêng tư", 403);
+        }
+
+        return frontendUrl + "/modules/" + moduleId;
+    }
+
+    @Transactional
+    public void toggleLike(Authentication authentication, Long moduleId) {
+        User user = authService.validateUser(authentication);
+
+        Module module = moduleRepository.findByIdAndIsDeleted(moduleId, false)
+                .orElseThrow(() -> new BusinessException("Học phần không tồn tại", 404));
+
+        if (module.getPermission() != ModulePermission.PUBLIC) {
+            throw new BusinessException("Chỉ có thể thích các học phần công khai", 403);
+        }
+
+        if (module.getLikedByUsers().contains(user)) {
+            module.getLikedByUsers().remove(user);
+        } else {
+            module.getLikedByUsers().add(user);
         }
     }
 }
