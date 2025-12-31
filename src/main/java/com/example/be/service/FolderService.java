@@ -7,6 +7,7 @@ import com.example.be.entity.User;
 import com.example.be.exception.BusinessException;
 import com.example.be.mapper.FolderMapper;
 import com.example.be.repository.FolderRepository;
+import com.example.be.repository.ModuleRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -29,6 +30,7 @@ public class FolderService {
     AuthService authService;
     FolderRepository folderRepository;
     FolderMapper folderMapper;
+    ModuleRepository moduleRepository;
 
     @Transactional
     public void createFolder(
@@ -67,9 +69,12 @@ public class FolderService {
         Folder folder = folderRepository.findByIdAndUser_IdAndIsDeleted(id, user.getId(), false)
                 .orElseThrow(() -> new BusinessException("Thư mục không tồn tại", 404));
 
-        folder.setIsDeleted(true);
+        LocalDateTime now = LocalDateTime.now();
 
-        folderRepository.save(folder);
+        folder.setIsDeleted(true);
+        folder.setDeletedAt(now);
+
+        moduleRepository.updateSoftDeleteByFolderId(folder.getId(), true, now);
     }
 
     @Transactional(readOnly = true)
@@ -136,8 +141,9 @@ public class FolderService {
                 .orElseThrow(() -> new BusinessException("Thư mục không tồn tại", 404));
 
         folder.setIsDeleted(false);
+        folder.setDeletedAt(null);
 
-        folderRepository.save(folder);
+        moduleRepository.updateSoftDeleteByFolderId(folder.getId(), false, null);
     }
 
     @Transactional

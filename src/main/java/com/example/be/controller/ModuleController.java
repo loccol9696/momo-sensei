@@ -121,4 +121,81 @@ public class ModuleController {
                         .build()
         );
     }
+
+    @GetMapping("/modules/trash")
+    @Operation(
+            summary = "Lấy danh sách học phần trong thùng rác"
+    )
+    public ResponseEntity<ApiResponse<Page<ModuleResponse>>> getTrashModules(
+            Authentication authentication,
+            @RequestParam(defaultValue = "") String search,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Page<ModuleResponse> moduleResponse = moduleService.getTrashModules(authentication, search, page, size);
+
+        return ResponseEntity.ok(
+                ApiResponse.<Page<ModuleResponse>>builder()
+                        .success(true)
+                        .data(moduleResponse)
+                        .message("Lấy danh sách học phần trong thùng rác thành công")
+                        .build()
+        );
+    }
+
+    @GetMapping("/modules/trash/{moduleId}")
+    @Operation(
+            summary = "Lấy thông tin học phần trong thùng rác"
+    )
+    public ResponseEntity<ApiResponse<ModuleDetailResponse>> getTrashModule(
+            Authentication authentication,
+            @PathVariable Long moduleId
+    ) {
+        ModuleDetailResponse moduleResponse = moduleService.getTrashModule(authentication, moduleId);
+
+        return ResponseEntity.ok(
+                ApiResponse.<ModuleDetailResponse>builder()
+                        .success(true)
+                        .data(moduleResponse)
+                        .message("Lấy thông tin học phần trong thùng rác thành công")
+                        .build()
+        );
+    }
+
+    @PatchMapping("/modules/trash/{moduleId}/restore")
+    @Operation(
+            summary = "Khôi phục học phần từ thùng rác"
+    )
+    public ResponseEntity<ApiResponse<Void>> restoreModule(
+            Authentication authentication,
+            @PathVariable Long moduleId
+    ) {
+        moduleService.restoreModule(authentication, moduleId);
+        return ResponseEntity.ok(
+                ApiResponse.<Void>builder()
+                        .success(true)
+                        .message("Khôi phục học phần thành công")
+                        .build()
+        );
+    }
+
+    @PostMapping("/modules/{moduleId}/clone")
+    @Operation(
+            summary = "Sao chép học phần"
+    )
+    public ResponseEntity<ApiResponse<ModuleResponse>> cloneModule(
+            Authentication authentication,
+            @PathVariable Long moduleId,
+            @RequestParam Long folderId,
+            @RequestParam(required = false) String password
+    ) {
+        ModuleResponse response = moduleService.cloneModule(authentication, moduleId, folderId, password);
+        return ResponseEntity.ok(
+                ApiResponse.<ModuleResponse>builder()
+                        .success(true)
+                        .message("Sao chép học phần thành công")
+                        .data(response)
+                        .build()
+        );
+    }
 }
