@@ -5,6 +5,8 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Builder
@@ -23,30 +25,16 @@ public class Folder {
 
     LocalDateTime usedAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    User user;
-
     @Builder.Default
     Boolean isDeleted = false;
 
     LocalDateTime deletedAt;
 
-    @PrePersist
-    protected void onCreate() {
-        this.usedAt = LocalDateTime.now();
-    }
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    User user;
 
-    @PreUpdate
-    protected void onUpdate() {
-        this.usedAt = LocalDateTime.now();
-
-        if (Boolean.TRUE.equals(this.isDeleted)) {
-            if (this.deletedAt == null) {
-                this.deletedAt = LocalDateTime.now();
-            }
-        } else {
-            this.deletedAt = null;
-        }
-    }
+    @Builder.Default
+    @OneToMany(mappedBy = "folder", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<Module> modules = new ArrayList<>();
 }

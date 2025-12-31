@@ -43,7 +43,7 @@ public class FolderController {
         );
     }
 
-    @PostMapping("/update/{id}")
+    @PostMapping("/{id}")
     @Operation(
             summary = "Cập nhật thông tin thư mục"
     )
@@ -59,7 +59,7 @@ public class FolderController {
         );
     }
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     @Operation(
             summary = "Xóa thư mục"
     )
@@ -153,7 +153,7 @@ public class FolderController {
         );
     }
 
-    @PostMapping("trash/restore/{id}")
+    @PatchMapping("trash/restore/{id}")
     @Operation(
             summary = "Khôi phục thư mục từ thùng rác"
     )

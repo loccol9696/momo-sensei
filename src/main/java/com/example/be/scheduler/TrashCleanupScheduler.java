@@ -1,6 +1,7 @@
 package com.example.be.scheduler;
 
 import com.example.be.service.FolderService;
+import com.example.be.service.ModuleService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -14,13 +15,15 @@ import java.time.LocalDateTime;
 @Component
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class FolderCleanupScheduler {
+public class TrashCleanupScheduler {
 
     FolderService folderService;
+    ModuleService moduleService;
 
     @Scheduled(cron = "0 0 2 * * ?")
     public void cleanup() {
         log.info("Bắt đầu tiến trình dọn dẹp thùng rác...");
+        moduleService.deleteExpiredModules(LocalDateTime.now().minusDays(30));
         folderService.deleteExpiredFolders(LocalDateTime.now().minusDays(30));
         log.info("Kết thúc tiến trình dọn dẹp.");
     }

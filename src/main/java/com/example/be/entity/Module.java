@@ -32,7 +32,8 @@ public class Module {
 
     String password;
 
-    LocalDateTime usedAt;
+    @Builder.Default
+    LocalDateTime usedAt = LocalDateTime.now();
 
     @Enumerated(EnumType.STRING)
     ModulePermission permission;

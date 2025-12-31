@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -252,5 +253,14 @@ public class AuthService {
         return userRepository.findByEmail(email).orElseThrow(
                 () -> new BusinessException("Email không tồn tại trong hệ thống", 404)
         );
+    }
+
+    public User getCurrentUser(Authentication authentication) {
+        User currentUser = null;
+        if (authentication != null && authentication.isAuthenticated()
+                && !(authentication instanceof AnonymousAuthenticationToken)) {
+            currentUser = validateUser(authentication);
+        }
+        return currentUser;
     }
 }
