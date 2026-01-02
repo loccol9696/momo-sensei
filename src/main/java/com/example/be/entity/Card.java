@@ -24,6 +24,14 @@ public class Card {
 
     String imageUrl;
 
+    Integer orderIndex;
+
+    @Builder.Default
+    boolean isStarred = false;
+
+    @Builder.Default
+    boolean isDeleted = false;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "module_id", nullable = false)
     Module module;

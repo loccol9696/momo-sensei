@@ -16,4 +16,6 @@ public class CardResponse {
     String term;
     String definition;
     String imageUrl;
+    Integer orderIndex;
+    boolean isStarred;
 }
