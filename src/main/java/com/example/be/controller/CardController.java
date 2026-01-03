@@ -1,5 +1,6 @@
 package com.example.be.controller;
 
+import com.example.be.dto.request.CardImportRequest;
 import com.example.be.dto.request.CardRequest;
 import com.example.be.dto.response.ApiResponse;
 import com.example.be.dto.response.CardResponse;
@@ -90,15 +91,13 @@ public class CardController {
     }
 
     @GetMapping("/modules/{moduleId}/cards")
-    @Operation
-    (
-            summary = "Lấy danh sách thẻ theo học phần"
-    )
     public ResponseEntity<ApiResponse<List<CardResponse>>> getCards(
             Authentication authentication,
-            @PathVariable Long moduleId
+            @PathVariable Long moduleId,
+            @RequestParam(required = false, defaultValue = "false") boolean isStarred,
+            @RequestParam(required = false, defaultValue = "false") boolean shuffle
     ) {
-        List<CardResponse> cardResponses = cardService.getCards(authentication, moduleId);
+        List<CardResponse> cardResponses = cardService.getCards(authentication, moduleId, isStarred, shuffle);
 
         return ResponseEntity.ok(
                 ApiResponse.<List<CardResponse>>builder()
@@ -109,22 +108,22 @@ public class CardController {
         );
     }
 
-    @PostMapping("/modules/{moduleId}/cards/shuffle")
+    @GetMapping("/cards/{cardId}")
     @Operation
     (
-            summary = "Xáo trộn danh sách thẻ trong học phần"
+            summary = "Lấy thông tin thẻ"
     )
-    public ResponseEntity<ApiResponse<List<CardResponse>>> shuffleCards(
+    public ResponseEntity<ApiResponse<CardResponse>> getCard(
             Authentication authentication,
-            @PathVariable Long moduleId
+            @PathVariable Long cardId
     ) {
-        List<CardResponse> cardResponses = cardService.shuffleCards(authentication, moduleId);
+        CardResponse cardResponse = cardService.getCard(authentication, cardId);
 
         return ResponseEntity.ok(
-                ApiResponse.<List<CardResponse>>builder()
+                ApiResponse.<CardResponse>builder()
                         .success(true)
-                        .data(cardResponses)
-                        .message("Xáo trộn danh sách thẻ thành công")
+                        .data(cardResponse)
+                        .message("Lấy thông tin thẻ thành công")
                         .build()
         );
     }
@@ -164,6 +163,27 @@ public class CardController {
                 ApiResponse.<Void>builder()
                         .success(true)
                         .message("Sắp xếp lại thứ tự thẻ thành công")
+                        .build()
+        );
+    }
+
+    @PostMapping("/modules/{moduleId}/cards/import")
+    @Operation
+    (
+            summary = "Nhập thẻ từ văn bản thô"
+    )
+    public ResponseEntity<ApiResponse<List<CardResponse>>> importCards(
+            Authentication authentication,
+            @PathVariable Long moduleId,
+            @Valid @RequestBody CardImportRequest cardImportRequest
+    ) {
+        List<CardResponse> cardResponses = cardService.importCards(authentication, moduleId, cardImportRequest);
+
+        return ResponseEntity.ok(
+                ApiResponse.<List<CardResponse>>builder()
+                        .success(true)
+                        .data(cardResponses)
+                        .message("Nhập thẻ thành công")
                         .build()
         );
     }

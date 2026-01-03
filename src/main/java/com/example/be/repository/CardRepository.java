@@ -22,6 +22,8 @@ public interface CardRepository extends JpaRepository<Card, Long> {
 
     List<Card> findAllByModuleIdAndIsDeletedFalseOrderByOrderIndexAsc(Long moduleId);
 
+    List<Card> findAllByModuleIdAndIsDeletedFalseAndIsStarredTrueOrderByOrderIndexAsc(Long moduleId);
+
     @Modifying
     @Query("UPDATE Card c SET c.orderIndex = :newIndex WHERE c.id = :cardId AND c.module.id = :moduleId")
     void updateOrderIndex(Long cardId, Integer newIndex, Long moduleId);
