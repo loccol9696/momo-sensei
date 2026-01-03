@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 public interface ModuleRepository extends JpaRepository<Module,Long> {
+    boolean existsByIdAndUser_IdAndIsDeleted(Long id, Long userId, Boolean isDeleted);
+
     Optional<Module> findByIdAndIsDeleted(Long id, Boolean isDeleted);
 
     Optional<Module> findByIdAndUser_IdAndIsDeleted(Long id, Long userId, Boolean isDeleted);
