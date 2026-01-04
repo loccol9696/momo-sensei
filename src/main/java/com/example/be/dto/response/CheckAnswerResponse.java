@@ -10,7 +10,7 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class WriteTestResponse {
+public class CheckAnswerResponse {
     boolean isCorrect;
     String correctAnswer;
 }

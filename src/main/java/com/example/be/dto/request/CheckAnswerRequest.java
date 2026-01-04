@@ -10,7 +10,7 @@ import lombok.experimental.FieldDefaults;
 @Data
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class WriteTestRequest {
+public class CheckAnswerRequest {
     @NotNull(message = "ID thẻ không được để trống")
     Long cardId;
 
