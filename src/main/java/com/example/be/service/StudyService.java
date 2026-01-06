@@ -1,10 +1,8 @@
 package com.example.be.service;
 
 import com.example.be.dto.request.CheckAnswerRequest;
-import com.example.be.dto.response.CardResponse;
-import com.example.be.dto.response.ChoiceQuestionResponse;
-import com.example.be.dto.response.WriteQuestionResponse;
-import com.example.be.dto.response.CheckAnswerResponse;
+import com.example.be.dto.request.MatchGameRequest;
+import com.example.be.dto.response.*;
 import com.example.be.entity.Card;
 import com.example.be.entity.User;
 import com.example.be.exception.BusinessException;
@@ -101,5 +99,57 @@ public class StudyService {
                     .options(options)
                     .build();
         }).collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<MatchGameResponse> getMatchGame(
+            Authentication authentication, Long moduleId, int level, boolean isStarred
+    ) {
+        List<CardResponse> allCards = cardService.getCards(authentication, moduleId, isStarred, false);
+        int total = allCards.size();
+
+        int limit = 4 + (level - 1) * 2;
+        limit = Math.min(limit, 20);
+
+        int offset = (level - 1) * (level + 2);
+
+        if (offset >= total) {
+            throw new BusinessException("Bạn đã hoàn thành tất cả các màn chơi!", 400);
+        }
+
+        int end = Math.min(offset + limit, total);
+        List<CardResponse> gameCards = allCards.subList(offset, end);
+
+        List<MatchGameResponse> elements = new ArrayList<>();
+        for (CardResponse card : gameCards) {
+            elements.add(
+                    MatchGameResponse.builder()
+                            .cardId(card.getId())
+                            .content(card.getTerm())
+                            .type("TERM")
+                            .build()
+            );
+
+            elements.add(
+                    MatchGameResponse.builder()
+                            .cardId(card.getId())
+                            .content(card.getDefinition())
+                            .type("TERM")
+                            .build()
+            );
+        }
+
+        Collections.shuffle(elements);
+        return elements;
+    }
+
+    public CheckAnswerResponse checkMatchGame(MatchGameRequest request) {
+
+        boolean isCorrect = Objects.equals(request.getFirstCardId(), request.getSecondCardId())
+                && request.getFirstCardType() != request.getSecondCardType();
+
+        return CheckAnswerResponse.builder()
+                .isCorrect(isCorrect)
+                .build();
     }
 }
