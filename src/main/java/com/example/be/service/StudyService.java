@@ -5,6 +5,7 @@ import com.example.be.dto.request.MatchGameRequest;
 import com.example.be.dto.response.*;
 import com.example.be.entity.Card;
 import com.example.be.entity.User;
+import com.example.be.enums.CardType;
 import com.example.be.exception.BusinessException;
 import com.example.be.repository.CardRepository;
 import com.example.be.utils.StringUtils;
@@ -126,7 +127,7 @@ public class StudyService {
                     MatchGameResponse.builder()
                             .cardId(card.getId())
                             .content(card.getTerm())
-                            .type("TERM")
+                            .cardType(CardType.TERM)
                             .build()
             );
 
@@ -134,7 +135,7 @@ public class StudyService {
                     MatchGameResponse.builder()
                             .cardId(card.getId())
                             .content(card.getDefinition())
-                            .type("TERM")
+                            .cardType(CardType.DEFINITION)
                             .build()
             );
         }

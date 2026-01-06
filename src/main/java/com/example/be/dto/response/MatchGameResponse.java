@@ -1,5 +1,6 @@
 package com.example.be.dto.response;
 
+import com.example.be.enums.CardType;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -11,5 +12,5 @@ import lombok.experimental.FieldDefaults;
 public class MatchGameResponse {
     Long cardId;
     String content;
-    String type;
+    CardType cardType;
 }
