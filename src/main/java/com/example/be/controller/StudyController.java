@@ -1,10 +1,7 @@
 package com.example.be.controller;
 
 import com.example.be.dto.request.CheckAnswerRequest;
-import com.example.be.dto.response.ApiResponse;
-import com.example.be.dto.response.ChoiceQuestionResponse;
-import com.example.be.dto.response.WriteQuestionResponse;
-import com.example.be.dto.response.CheckAnswerResponse;
+import com.example.be.dto.response.*;
 import com.example.be.service.StudyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -50,7 +47,7 @@ public class StudyController {
     public ResponseEntity<ApiResponse<List<ChoiceQuestionResponse>>> getChoiceQuestions(
             Authentication authentication,
             @PathVariable Long moduleId,
-            @RequestParam(defaultValue = "false") boolean isStarred
+            @RequestParam(defaultValue = "false", required = false) boolean isStarred
     ) {
         List<ChoiceQuestionResponse> questions = studyService.getChoiceQuestions(authentication, moduleId, isStarred);
         return ResponseEntity.ok(
@@ -75,6 +72,24 @@ public class StudyController {
                         .success(true)
                         .data(response)
                         .message("Đã xử lý kết quả kiểm tra")
+                        .build()
+        );
+    }
+
+    @GetMapping("/match/{moduleId}")
+    @Operation(summary = "Lấy danh sách câu hỏi cho trò chơi nối thẻ")
+    public ResponseEntity<ApiResponse<List<MatchGameResponse>>> getMatchGame(
+            Authentication authentication,
+            @PathVariable Long moduleId,
+            @RequestParam(defaultValue = "1") int level
+    ) {
+        List<MatchGameResponse> responses = studyService.getMatchGame(authentication, moduleId, level);
+
+        return ResponseEntity.ok(
+                ApiResponse.<List<MatchGameResponse>>builder()
+                        .success(true)
+                        .data(responses)
+                        .message("Bắt đầu màn chơi thứ " + level)
                         .build()
         );
     }
