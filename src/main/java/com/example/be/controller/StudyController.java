@@ -1,6 +1,7 @@
 package com.example.be.controller;
 
 import com.example.be.dto.request.CheckAnswerRequest;
+import com.example.be.dto.request.MatchGameRequest;
 import com.example.be.dto.response.*;
 import com.example.be.service.StudyService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -91,6 +92,22 @@ public class StudyController {
                         .success(true)
                         .data(responses)
                         .message("Bắt đầu màn chơi thứ " + level)
+                        .build()
+        );
+    }
+
+    @PostMapping("/match/check")
+    @Operation(summary = "Kiểm tra cặp mảnh ghép người dùng đã nối")
+    public ResponseEntity<ApiResponse<CheckAnswerResponse>> checkMatchGame(
+            @Valid @RequestBody MatchGameRequest request
+    ) {
+        CheckAnswerResponse result = studyService.checkMatchGame(request);
+
+        return ResponseEntity.ok(
+                ApiResponse.<CheckAnswerResponse>builder()
+                        .success(true)
+                        .data(result)
+                        .message(result.isCorrect() ? "Chính xác" : "Chưa đúng rồi")
                         .build()
         );
     }

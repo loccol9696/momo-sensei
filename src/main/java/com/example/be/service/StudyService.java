@@ -1,6 +1,7 @@
 package com.example.be.service;
 
 import com.example.be.dto.request.CheckAnswerRequest;
+import com.example.be.dto.request.MatchGameRequest;
 import com.example.be.dto.response.*;
 import com.example.be.entity.Card;
 import com.example.be.entity.User;
@@ -140,5 +141,15 @@ public class StudyService {
 
         Collections.shuffle(elements);
         return elements;
+    }
+
+    public CheckAnswerResponse checkMatchGame(MatchGameRequest request) {
+
+        boolean isCorrect = Objects.equals(request.getFirstCardId(), request.getSecondCardId())
+                && request.getFirstCardType() != request.getSecondCardType();
+
+        return CheckAnswerResponse.builder()
+                .isCorrect(isCorrect)
+                .build();
     }
 }
