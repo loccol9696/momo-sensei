@@ -81,9 +81,10 @@ public class StudyController {
     public ResponseEntity<ApiResponse<List<MatchGameResponse>>> getMatchGame(
             Authentication authentication,
             @PathVariable Long moduleId,
-            @RequestParam(defaultValue = "1") int level
+            @RequestParam(defaultValue = "1") int level,
+            @RequestParam(defaultValue = "false", required = false) boolean isStarred
     ) {
-        List<MatchGameResponse> responses = studyService.getMatchGame(authentication, moduleId, level);
+        List<MatchGameResponse> responses = studyService.getMatchGame(authentication, moduleId, level, isStarred);
 
         return ResponseEntity.ok(
                 ApiResponse.<List<MatchGameResponse>>builder()

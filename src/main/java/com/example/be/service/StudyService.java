@@ -102,9 +102,9 @@ public class StudyService {
 
     @Transactional(readOnly = true)
     public List<MatchGameResponse> getMatchGame(
-            Authentication authentication, Long moduleId, int level
+            Authentication authentication, Long moduleId, int level, boolean isStarred
     ) {
-        List<CardResponse> allCards = cardService.getCards(authentication, moduleId, false, false);
+        List<CardResponse> allCards = cardService.getCards(authentication, moduleId, isStarred, false);
         int total = allCards.size();
 
         int limit = 4 + (level - 1) * 2;
