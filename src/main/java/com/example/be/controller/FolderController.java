@@ -2,6 +2,7 @@ package com.example.be.controller;
 
 import com.example.be.dto.request.FolderRequest;
 import com.example.be.dto.response.ApiResponse;
+import com.example.be.dto.response.FolderDetailResponse;
 import com.example.be.dto.response.FolderResponse;
 import com.example.be.service.FolderService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -101,12 +102,12 @@ public class FolderController {
     @Operation(
             summary = "Lấy thông tin thư mục theo ID"
     )
-    public ResponseEntity<ApiResponse<FolderResponse>> getFolder(
+    public ResponseEntity<ApiResponse<FolderDetailResponse>> getFolder(
             Authentication authentication, @PathVariable Long id
     ) {
-        FolderResponse response = folderService.getFolder(authentication, id);
+        FolderDetailResponse response = folderService.getFolder(authentication, id);
         return ResponseEntity.ok(
-                ApiResponse.<FolderResponse>builder()
+                ApiResponse.<FolderDetailResponse>builder()
                         .success(true)
                         .message("Lấy thông tin thư mục thành công")
                         .data(response)

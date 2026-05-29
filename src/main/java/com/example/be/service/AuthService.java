@@ -2,6 +2,7 @@ package com.example.be.service;
 
 import com.example.be.dto.request.*;
 import com.example.be.dto.response.AuthResponse;
+import com.example.be.dto.response.ProfileResponse;
 import com.example.be.entity.User;
 import com.example.be.enums.AuthProvider;
 import com.example.be.enums.OtpType;
@@ -128,8 +129,16 @@ public class AuthService {
 
         String token = jwtService.generateToken(user);
 
+        ProfileResponse profile = ProfileResponse.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .fullName(user.getFullName())
+                .avatar(user.getAvatar())
+                .build();
+
         return AuthResponse.builder()
                 .token(token)
+                .profile(profile)
                 .build();
     }
 
@@ -220,9 +229,16 @@ public class AuthService {
                 return userRepository.save(u);
             });
 
+            ProfileResponse profile = ProfileResponse.builder()
+                    .id(user.getId())
+                    .email(user.getEmail())
+                    .fullName(user.getFullName())
+                    .avatar(user.getAvatar())
+                    .build();
+
             // Tạo JWT
             String jwt = jwtService.generateToken(user);
-            return AuthResponse.builder().token(jwt).build();
+            return AuthResponse.builder().token(jwt).profile(profile).build();
 
         } catch (Exception e) {
             throw new BusinessException("Đăng nhập Google thất bại: " + e.getMessage(), 500);
