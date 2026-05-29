@@ -1,6 +1,7 @@
 package com.example.be.service;
 
 import com.example.be.dto.request.FolderRequest;
+import com.example.be.dto.response.FolderDetailResponse;
 import com.example.be.dto.response.FolderResponse;
 import com.example.be.entity.Folder;
 import com.example.be.entity.User;
@@ -95,13 +96,13 @@ public class FolderService {
     }
 
     @Transactional(readOnly = true)
-    public FolderResponse getFolder(Authentication authentication, Long id) {
+    public FolderDetailResponse getFolder(Authentication authentication, Long id) {
         User user = authService.validateUser(authentication);
 
         Folder folder = folderRepository.findByIdAndUser_IdAndIsDeleted(id, user.getId(), false)
                 .orElseThrow(() -> new BusinessException("Thư mục không tồn tại", 404));
 
-        return folderMapper.toFolderResponse(folder);
+        return folderMapper.toFolderDetailResponse(folder);
     }
 
     @Transactional(readOnly = true)
