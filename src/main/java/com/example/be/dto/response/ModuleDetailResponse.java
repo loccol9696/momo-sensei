@@ -1,8 +1,6 @@
 package com.example.be.dto.response;
 
 import com.example.be.enums.ModulePermission;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 

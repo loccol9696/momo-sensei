@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.Formula;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -53,6 +54,7 @@ public class Module {
 
     @Builder.Default
     @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true)
+    @SQLRestriction("is_deleted = 0")
     List<Card> cards = new ArrayList<>();
 
     @Builder.Default
@@ -73,7 +75,7 @@ public class Module {
     )
     Set<User> viewedByUsers = new HashSet<>();
 
-    @Formula("(select count(*) from cards c where c.module_id = id)")
+    @Formula("(select count(*) from cards c where c.module_id = id and c.is_deleted = 0)")
     Integer totalCards;
 
     @Formula("(select count(*) from module_likes ml where ml.module_id = id)")

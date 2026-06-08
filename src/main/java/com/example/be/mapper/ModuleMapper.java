@@ -6,7 +6,7 @@ import com.example.be.entity.Module;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {CardMapper.class})
 public interface ModuleMapper {
     @Mapping(target = "ownerId", source = "user.id")
     @Mapping(target = "ownerName", source = "user.fullName")

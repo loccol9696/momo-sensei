@@ -147,6 +147,7 @@ public class CardService {
         }
 
         card.setStarred(!card.isStarred());
+        cardRepository.save(card);
     }
 
     @Transactional
