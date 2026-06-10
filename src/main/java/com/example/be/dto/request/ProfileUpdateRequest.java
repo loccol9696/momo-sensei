@@ -1,7 +1,9 @@
 package com.example.be.dto.request;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.springframework.web.multipart.MultipartFile;
 
 @Data
 @Builder
@@ -9,7 +11,9 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProfileUpdateRequest {
-    String password;
+
+    @NotBlank(message = "Tên không được để trống")
     String fullName;
-    String avatar;
+
+    MultipartFile avatarFile;
 }

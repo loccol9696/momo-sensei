@@ -1,14 +1,17 @@
 package com.example.be.controller;
 
+import com.example.be.dto.request.ChangePasswordRequest;
 import com.example.be.dto.request.ProfileUpdateRequest;
 import com.example.be.dto.response.ApiResponse;
 import com.example.be.dto.response.ProfileResponse;
 import com.example.be.service.ProfileService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -41,12 +44,13 @@ public class ProfileController {
         return ResponseEntity.ok(apiResponse);
     }
 
-    @PatchMapping
+    @PatchMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(
             summary = "Cập nhật thông tin cá nhân"
     )
     public ResponseEntity<ApiResponse<ProfileResponse>> updateProfile(
-            Authentication authentication, @RequestBody ProfileUpdateRequest request
+            Authentication authentication,
+            @Valid @ModelAttribute ProfileUpdateRequest request
     ) {
         ProfileResponse response = profileService.updateProfile(authentication, request);
 
@@ -54,6 +58,24 @@ public class ProfileController {
                 .success(true)
                 .message("Cập nhật thông tin cá nhân thành công")
                 .data(response)
+                .build();
+
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    @PutMapping("/password")
+    @Operation(
+            summary = "Thay đổi mật khẩu"
+    )
+    public ResponseEntity<ApiResponse<String>> changePassword(
+            Authentication authentication,
+            @Valid @RequestBody ChangePasswordRequest request
+    ) {
+        profileService.changePassword(authentication, request);
+
+        ApiResponse<String> apiResponse = ApiResponse.<String>builder()
+                .success(true)
+                .message("Thay đổi mật khẩu thành công")
                 .build();
 
         return ResponseEntity.ok(apiResponse);
