@@ -41,4 +41,11 @@ public interface ModuleRepository extends JpaRepository<Module,Long> {
     @Query("UPDATE Module m SET m.isDeleted = :status, m.deletedAt = :time" +
             " WHERE m.folder.id = :folderId")
     void updateSoftDeleteByFolderId(Long folderId, boolean status , LocalDateTime time);
+
+    @Query("SELECT m FROM Module m WHERE m.isDeleted = false " +
+           "AND (m.permission = com.example.be.enums.ModulePermission.PUBLIC " +
+           "OR m.permission = com.example.be.enums.ModulePermission.PASSWORD " +
+           "OR m.user.id = :userId) " +
+           "AND (LOWER(m.name) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(m.description) LIKE LOWER(CONCAT('%', :search, '%')))")
+    Page<Module> searchModules(@Param("search") String search, @Param("userId") Long userId, Pageable pageable);
 }

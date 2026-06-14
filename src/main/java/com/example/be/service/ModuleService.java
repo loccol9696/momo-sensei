@@ -30,6 +30,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+import com.example.be.repository.UserCardStarRepository;
+import com.example.be.dto.response.CardResponse;
 
 @Service
 @RequiredArgsConstructor
@@ -42,6 +46,7 @@ public class ModuleService {
     ModuleMapper moduleMapper;
     PasswordEncoder passwordEncoder;
     CardRepository cardRepository;
+    UserCardStarRepository userCardStarRepository;
 
     @NonFinal
     @Value("${frontend.url}")
@@ -142,7 +147,13 @@ public class ModuleService {
                         folderId, user.getId(), false, searchKey, pageable
                 );
 
-        return modulePage.map(moduleMapper::toModuleResponse);
+        return modulePage.map(module -> {
+            ModuleResponse response = moduleMapper.toModuleResponse(module);
+            if (user != null) {
+                response.setLiked(module.getLikedByUsers().contains(user));
+            }
+            return response;
+        });
     }
 
     @Transactional
@@ -168,6 +179,16 @@ public class ModuleService {
             if (Objects.equals(currentUser.getId(), module.getUser().getId())) {
                 module.setUsedAt(LocalDateTime.now());
             }
+
+            if (response.getCards() != null && !response.getCards().isEmpty()) {
+                Set<Long> starredCardIds = userCardStarRepository.findAllByUserId(currentUser.getId())
+                        .stream()
+                        .map(star -> star.getCard().getId())
+                        .collect(Collectors.toSet());
+                for (CardResponse cardResp : response.getCards()) {
+                    cardResp.setStarred(starredCardIds.contains(cardResp.getId()));
+                }
+            }
         }
         return response;
     }
@@ -186,7 +207,13 @@ public class ModuleService {
                 user.getId(), true, search, pageable
         );
 
-        return modulePage.map(moduleMapper::toModuleResponse);
+        return modulePage.map(module -> {
+            ModuleResponse response = moduleMapper.toModuleResponse(module);
+            if (user != null) {
+                response.setLiked(module.getLikedByUsers().contains(user));
+            }
+            return response;
+        });
     }
 
     @Transactional(readOnly = true)
@@ -332,8 +359,8 @@ public class ModuleService {
         Module module = moduleRepository.findByIdAndIsDeleted(moduleId, false)
                 .orElseThrow(() -> new BusinessException("Học phần không tồn tại", 404));
 
-        if (module.getPermission() != ModulePermission.PUBLIC) {
-            throw new BusinessException("Chỉ có thể thích các học phần công khai", 403);
+        if (module.getPermission() == ModulePermission.PRIVATE) {
+            throw new BusinessException("Không thể thích các học phần riêng tư", 403);
         }
 
         if (module.getLikedByUsers().contains(user)) {
@@ -341,5 +368,22 @@ public class ModuleService {
         } else {
             module.getLikedByUsers().add(user);
         }
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ModuleResponse> searchModules(Authentication authentication, String search, int page, int size) {
+        User user = authService.validateUser(authentication);
+        String searchKey = (search == null) ? "" : search.trim();
+        Sort sort = Sort.by(Sort.Direction.DESC, "usedAt");
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<Module> modulePage = moduleRepository.searchModules(searchKey, user.getId(), pageable);
+        return modulePage.map(module -> {
+            ModuleResponse response = moduleMapper.toModuleResponse(module);
+            if (user != null) {
+                response.setLiked(module.getLikedByUsers().contains(user));
+            }
+            return response;
+        });
     }
 }

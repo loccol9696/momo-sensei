@@ -44,6 +44,22 @@ public class ProfileController {
         return ResponseEntity.ok(apiResponse);
     }
 
+    @GetMapping("/{userId}")
+    @Operation(
+            summary = "Lấy thông tin cá nhân của người khác bằng userId"
+    )
+    public ResponseEntity<ApiResponse<ProfileResponse>> getProfileById(@PathVariable Long userId) {
+        ProfileResponse response = profileService.getProfileById(userId);
+
+        ApiResponse<ProfileResponse> apiResponse = ApiResponse.<ProfileResponse>builder()
+                .success(true)
+                .message("Lấy thông tin cá nhân thành công")
+                .data(response)
+                .build();
+
+        return ResponseEntity.ok(apiResponse);
+    }
+
     @PatchMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(
             summary = "Cập nhật thông tin cá nhân"

@@ -55,6 +55,7 @@ public class Module {
     @Builder.Default
     @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true)
     @SQLRestriction("is_deleted = 0")
+    @OrderBy("orderIndex ASC")
     List<Card> cards = new ArrayList<>();
 
     @Builder.Default

@@ -35,10 +35,19 @@ public class ProfileService {
     AuthService authService;
     PasswordEncoder passwordEncoder;
     Cloudinary cloudinary;
+    UserRepository userRepository;
 
     @Transactional(readOnly = true)
     public ProfileResponse getProfile(Authentication authentication) {
         User user = authService.validateUser(authentication);
+
+        return userMapper.toProfileResponse(user);
+    }
+
+    @Transactional(readOnly = true)
+    public ProfileResponse getProfileById(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException("Không tìm thấy người dùng", 404));
 
         return userMapper.toProfileResponse(user);
     }

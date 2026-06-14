@@ -109,10 +109,25 @@ public class StudyService {
         List<CardResponse> allCards = cardService.getCards(authentication, moduleId, isStarred, false);
         int total = allCards.size();
 
-        int limit = 4 + (level - 1) * 2;
-        limit = Math.min(limit, 20);
+        int INITIAL_PAIRS = 4;
+        int PAIRS_STEP = 2;
+        int MAX_PAIRS = 10;
 
-        int offset = (level - 1) * (level + 2);
+        int limit;
+        int offset = 0;
+
+        int levelReachMax = (MAX_PAIRS - INITIAL_PAIRS) / PAIRS_STEP + 1;
+
+        if (level <= levelReachMax) {
+            limit = INITIAL_PAIRS + (level - 1) * PAIRS_STEP;
+            offset = (level - 1) * (level + 2);
+        } else {
+            limit = MAX_PAIRS;
+
+            int offsetAtMax = (levelReachMax - 1) * (levelReachMax + 2);
+
+            offset = offsetAtMax + (level - levelReachMax) * MAX_PAIRS;
+        }
 
         if (offset >= total) {
             throw new BusinessException("Bạn đã hoàn thành tất cả các màn chơi!", 400);

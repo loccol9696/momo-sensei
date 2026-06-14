@@ -18,4 +18,7 @@ public class ModuleResponse {
     String ownerAvatar;
     ModulePermission permission;
     Integer totalCards;
+    Integer totalLikes;
+    @Builder.Default
+    Boolean liked = false;
 }

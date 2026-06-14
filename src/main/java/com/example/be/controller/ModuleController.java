@@ -262,5 +262,25 @@ public class ModuleController {
         );
     }
 
+    @GetMapping("/modules/search")
+    @Operation(
+            summary = "Tìm kiếm các học phần"
+    )
+    public ResponseEntity<ApiResponse<Page<ModuleResponse>>> searchModules(
+            Authentication authentication,
+            @RequestParam(defaultValue = "") String search,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Page<ModuleResponse> moduleResponses = moduleService.searchModules(authentication, search, page, size);
+
+        return ResponseEntity.ok(
+                ApiResponse.<Page<ModuleResponse>>builder()
+                        .success(true)
+                        .data(moduleResponses)
+                        .message("Tìm kiếm học phần thành công")
+                        .build()
+        );
+    }
 
 }

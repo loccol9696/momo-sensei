@@ -9,7 +9,7 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface CardMapper {
-    @Mapping(target = "isStarred", expression = "java(card.isStarred())")
+    @Mapping(target = "isStarred", ignore = true)
     CardResponse toCardResponse(Card card);
     List<CardResponse> toCardResponseList(List<Card> cards);
 }
