@@ -14,4 +14,5 @@ public class AiChatRequest {
     private Long moduleId;
     private String message;
     private List<ChatMessage> history;
+    private String theme;
 }
